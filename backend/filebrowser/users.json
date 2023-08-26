@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "username": "pocketdock",
+        "password": "<hashNotNeeded>",
+        "scope": "/",
+        "locale": "en",
+        "lockPassword": true,
+        "viewMode": "list",
+        "singleClick": false,
+        "perm": {
+            "admin": false,
+            "execute": false,
+            "create": true,
+            "rename": true,
+            "modify": true,
+            "delete": true,
+            "share": false,
+            "download": true
+        },
+        "commands": [],
+        "sorting": {
+            "by": "name",
+            "asc": false
+        },
+        "rules": [],
+        "hideDotfiles": false,
+        "dateFormat": false
+    }
+]

@@ -1,0 +1,4 @@
+PocketDockUI/*/bin
+PocketDockUI/*/obj
+.idea
+secrets.txt

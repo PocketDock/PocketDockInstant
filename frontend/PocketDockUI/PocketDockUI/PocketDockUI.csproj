@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>disable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>6d73d216-b1cb-4570-a77f-5d2a5d6e2c55</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Firewall" Version="3.0.0" />
+      <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.13">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.8" />
+      <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+      <PackageReference Include="Yarp.ReverseProxy" Version="1.1.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PocketDockUI.Data\PocketDockUI.Data.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\font-awesome.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\font-awesome.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\fonts\fontawesome-webfont.eot" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\fonts\fontawesome-webfont.svg" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\fonts\fontawesome-webfont.ttf" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\fonts\fontawesome-webfont.woff" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\fonts\FontAwesome.otf" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\bordered-pulled.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\core.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\fixed-width.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\font-awesome.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\icons.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\larger.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\list.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\mixins.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\path.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\rotated-flipped.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\spinning.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\stacked.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\less\variables.less" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\font-awesome.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_bordered-pulled.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_core.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_fixed-width.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_icons.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_larger.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_list.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_mixins.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_path.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_rotated-flipped.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_spinning.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_stacked.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_variables.scss" />
+    </ItemGroup>
+
+</Project>

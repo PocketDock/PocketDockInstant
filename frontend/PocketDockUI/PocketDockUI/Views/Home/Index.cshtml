@@ -1,0 +1,164 @@
+﻿@using Microsoft.Extensions.Options
+@model PocketDockUI.ViewModels.IndexPageViewModel
+
+@{
+    ViewData["Title"] = "Home";
+    ViewData["IsIndex"] = "true";
+}
+
+@inject IOptions<RecaptchaConfig> RecaptchaConfig
+
+@if (Model.SessionMessage != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+        @Model.SessionMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>   
+}
+
+<div class="intro-header">
+    <section class="py-5 text-center container">
+        <div class="row py-lg-5">
+            <div class="col-lg-8 col-md-8 mx-auto intro-message">
+                <h1>PocketDock | Instant</h1>
+                <h3>
+                    Create a PocketMine-MP server,
+                    <i>instantly</i>.
+                </h3>
+                <hr class="intro-divider">
+                <p>
+                    <a href="@(Model.HasServer ? @Url.ActionLink("Server") : "#")" class="btn btn-light btn-lg my-2 cr" id="create" data-isCreated="@Model.HasServer">
+                        <i id="cloudIcon" class="bi bi-cloudy-fill statusIcon"></i>
+                        <i id="spinnerIcon" class="spinner-border spinner-border-sm statusIcon" role="status" style="display: none"></i>
+                        <span class="network-name" id="createServerText" style="@ConvertDisplay(!Model.HasServer)">Create Server</span>
+                        <span class="network-name" id="creatingServerText" style="display:none">Creating Server...</span>
+                        <span class="network-name" id="createdServerText" style="@ConvertDisplay(Model.HasServer)">Go to your server</span>
+                    </a>
+                    <environment include="Development">
+                        <a href="@Url.ActionLink("ClearAllServers")" class="btn btn-danger btn-lg" id="clearServers">
+                            <span>
+                                <i class="fa fa-ban fa-fw"></i>
+                            </span>
+                            <span>Clear All Servers</span>
+                        </a>
+                    </environment>
+                    <div class="row justify-content-center">
+                        <div class="col-6">
+                            @using (Html.BeginForm("Launch", "Home", FormMethod.Post, htmlAttributes: new { id = "createForm" }))
+                            {
+                                @if (!Model.HasServer)
+                                {
+                                    <div class="form-group pb-4">
+                                        <label for="versionSelector">Version:</label>
+                                        <select asp-for="SelectedVersion" class="form-select" id="versionSelector" asp-items="@(new SelectList(Model.CachedVersions))">
+                                        </select>
+                                    </div>
+                                }
+                                <div id='recaptcha' class="g-recaptcha"
+                                     data-sitekey="@RecaptchaConfig.Value.SiteKey"
+                                     data-callback="recaptchaVerified"
+                                     data-size="invisible"
+                                     data-badge="inline">
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </p>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+<!-- Marketing messaging and featurettes
+================================================== -->
+<!-- Wrap the rest of the page in another container to center all the content. -->
+
+<div class="container marketing">
+
+    <!-- START THE FEATURETTES -->
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette" id="why">
+        <div class="col-lg-6">
+            <h2 class="section-heading">
+                <i>Why?</i><br>There had to be a better way.
+            </h2>
+            <p class="lead">PocketDock was cool and all, but we realized something: people want a no-strings-attached server that was there when they needed it, so Instant was the way to go</p>
+        </div>
+        <div class="col-lg-6">
+            <img class="featurette-image img-fluid mx-auto" width="500" height="500" role="img" src="img/string.jpg"/>
+
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette" id="how">
+        <div class="col-lg-6 order-md-2">
+            <h2 class="section-heading">
+                A bit different than before,
+                <a href="https://docker.io">Docker</a>+
+                <a href="http://shipyard-project.com">Shipyard</a>+
+                <a href="https://aws.amazon.com/">Amazon Web Services</a>
+                <br>
+                <i>A match made in heaven</i>
+            </h2>
+            <p class="lead">
+                A bit different than before, using
+                <a href="https://docker.io">Docker</a>+
+                <a href="http://shipyard-project.com">Shipyard</a>+
+                <a href="https://aws.amazon.com/">Amazon Web Services</a> has allowed us to setup a secure service, in
+                a fairly simple manner.
+            </p>
+        </div>
+        <div class="col-lg-6 order-md-1">
+            <img class="featurette-image img-fluid mx-auto" width="500" height="500" role="img" src="img/all.png"/>
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette" id="about">
+        <div class="col-md-7">
+            <h2 class="section-heading">We're the same two guys that brought you PocketDock</h2>
+            <p class="lead">PocketDock is alive and well, we are just trying to make the service best suited for the people. This was made because we hated the fact that the community like the project even though we were still working on it.</p>
+        </div>
+        <div class="col-md-5">
+            <img class="featurette-image img-fluid mx-auto" width="500" height="500" role="img" src="img/pm.png"/>
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <!-- /END THE FEATURETTES -->
+
+</div><!-- /.container -->
+
+<!-- FOOTER -->
+<footer class="container">
+    <p>PocketDock - A community project</p>
+    <p class="copyright text-muted small">
+        Images provided by:
+        <a href="http://wallpoper.com/wallpaper/dark-speed-359373">WallPoper</a>,
+        <a href="https://encodedlogic.deviantart.com/art/String-Theory-40906814">Paul Rohde (DeviantArt)</a>,
+        <a href="https://docker.io">Docker</a>,
+        <a href="http://shipyard-project.com">Shipyard</a> and
+        <a href="https://aws.amazon.com/">Amazon Web Services</a> respectively
+    </p>
+</footer>
+
+@section Scripts
+{
+    <script src="~/js/index.js" asp-append-version="true"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+}
+
+@functions
+{
+    private string ConvertDisplay(bool value)
+    {
+        return value ? "" : "display: none";
+    }
+}

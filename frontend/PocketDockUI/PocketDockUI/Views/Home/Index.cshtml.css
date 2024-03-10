@@ -40,3 +40,5 @@
 .alert {
     margin-bottom: 0!important;
 }
+
+#map { height: 600px; }

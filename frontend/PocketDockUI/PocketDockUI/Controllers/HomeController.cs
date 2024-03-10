@@ -12,6 +12,7 @@ using PocketDockUI.Extensions;
 using PocketDockUI.Models;
 using PocketDockUI.Services;
 using PocketDockUI.ViewModels;
+using Yarp.ReverseProxy.Configuration;
 
 namespace PocketDockUI.Controllers;
 
@@ -20,23 +21,29 @@ public class HomeController : BaseController
     private readonly PocketDockContext _context;
     private readonly RecaptchaService _recaptcha;
     private readonly IMemoryCache _memoryCache;
-    private readonly ProcessManager _processManager;
+    private readonly FlyService _flyService;
+    private readonly IProxyConfigProvider _proxyConfigProvider;
     private readonly ServerConfig _serverConfig;
     private readonly ILogger<HomeController> _logger;
+    private static readonly SemaphoreSlim _regionSemaphore = new(1, 1);
+    //Normally not needed, but prevents running multiple DB operations at once while running background tasks
+    private readonly SemaphoreSlim _dbContextSemaphore = new(1, 1);
 
     public HomeController(ILogger<HomeController> logger,
         PocketDockContext context,
         RecaptchaService recaptcha,
         IOptions<ServerConfig> serverConfig,
         IMemoryCache memoryCache,
-        ProcessManager processManager) : base(logger)
+        FlyService flyService,
+        IProxyConfigProvider proxyConfigProvider) : base(logger)
     {
         _logger = logger;
         _context = context;
         _recaptcha = recaptcha;
         _memoryCache = memoryCache;
         _serverConfig = serverConfig.Value;
-        _processManager = processManager;
+        _flyService = flyService;
+        _proxyConfigProvider = proxyConfigProvider;
     }
 
     public async Task<IActionResult> Index()
@@ -56,7 +63,17 @@ public class HomeController : BaseController
         }
 
         var sessionMessage = HttpContext.Session.GetBanner();
-        var viewModel = new IndexPageViewModel(hasServer, sessionMessage, cachedVersions);
+        var regions = await _context.Proxy
+            .Select(x => new ProxyDto()
+            {
+                Region = x.Region,
+                DisplayName = x.DisplayName,
+                Latitude = x.Latitude,
+                Longitude = x.Longitude
+            })
+            .OrderBy(x => x.DisplayName)
+            .ToListAsync();
+        var viewModel = new IndexPageViewModel(hasServer, sessionMessage, cachedVersions, regions.First().Region, regions);
         return View(viewModel);
     }
 
@@ -68,7 +85,9 @@ public class HomeController : BaseController
             return GoHome("noSessionFound2", "You do not currently have a server, please create one below.");
 
         }
-        var server = await _context.Server.SingleOrDefaultAsync(x => x.ServerAssignment.AssignedUserId == sessionId);
+        var server = await _context.Server
+            .Include(x => x.ServerAssignment.Proxy)
+            .SingleOrDefaultAsync(x => x.ServerAssignment.AssignedUserId == sessionId);
         if (server == null)
         {
             return GoHome("noServerFound2", "There was an error finding your server, please create a new one.");
@@ -93,7 +112,13 @@ public class HomeController : BaseController
             if (!cachedVersions.Contains(parameters.SelectedVersion, StringComparer.OrdinalIgnoreCase))
             {
                 return GoHome("invalidVersion", "Please select a valid version.");
-            }   
+            }
+        }
+
+        var regionProxy = _context.Proxy.SingleOrDefault(x => x.Region == parameters.SelectedRegion);
+        if (regionProxy == null)
+        {
+            return GoHome("invalidRegion", "Please select a valid region.");
         }
 
         Server currentServer = null;
@@ -107,13 +132,13 @@ public class HomeController : BaseController
             if (currentServer == null)
             {
                 currentServer = (await _context.Server
-                    .Where(x => x.ServerAssignment.AssignedUserId == null)
+                    .Where(x => x.ServerAssignment.AssignedUserId == null && x.Region == parameters.SelectedRegion)
                     .ToListAsync())
                     .MinBy(x => Guid.NewGuid());
 
                 if (currentServer == null)
                 {
-                    return GoHome("noServersAvailable", "No servers are available, please try again later.");
+                    return GoHome("noServersAvailable", "No servers are available in this region, please try again later.");
                 }
 
                 currentServer.ServerAssignment = new ServerAssignment
@@ -126,19 +151,92 @@ public class HomeController : BaseController
                 };
                 currentServer.ServerAssignmentId = currentServer.ServerAssignment.AssignedUserId;
 
-                if (_serverConfig.ProxyEnabled)
-                {
-                    await _processManager.LaunchProcess(currentServer);   
-                }
-
                 //NOTE: This needs to be before the trigger request and not after so the server can download it's config
                 await _context.SaveChangesAsync();
-            
-                //Fly.io has servers that have Wake on Request, so this will turn on the server.
-                var triggerUrl = $"http://{currentServer.TriggerIpAddress}:{currentServer.TriggerPort}/";
-                _logger.LogWarning($"Sending request to {triggerUrl}, {currentServer.ServerId}");
-                var client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-                await client.GetAsync(triggerUrl);
+
+                async Task AssignIpAddress()
+                {
+                    if (_serverConfig.ProxyV2Enabled)
+                    {
+                        using var _ = await _regionSemaphore.UseWaitAsync();
+                        //Get latest row from database in case IP address has been assigned
+                        using (await _dbContextSemaphore.UseWaitAsync())
+                        {
+                            regionProxy = _context.Proxy.SingleOrDefault(x => x.Region == parameters.SelectedRegion);   
+                        }
+                        if (regionProxy == null)
+                        {
+                            throw new InvalidOperationException("Region proxy was null");
+                        }
+                        regionProxy.IpAddress ??= await _flyService.AllocateIpAddress(regionProxy.AppName);
+                        currentServer.ServerAssignment.Proxy = regionProxy;
+                        using (await _dbContextSemaphore.UseWaitAsync())
+                        {
+                            await _context.SaveChangesAsync();
+                        }
+                    }   
+                }
+                
+                var assignIpTask = AssignIpAddress();
+                
+                async Task StartProxy()
+                {
+                    if (_serverConfig.ProxyV2Enabled)
+                    {
+                        await _flyService.StartMachine(regionProxy.ServerId, regionProxy.AppName);
+                        await _flyService.WaitMachine(regionProxy.ServerId, regionProxy.AppName);
+                        _logger.LogWarning($"Starting proxy for {regionProxy.Region} {regionProxy.Id}, {regionProxy.ServerId}");
+                    }
+                }
+
+                //Don't wait for proxy right now
+                var startProxyTask = StartProxy();
+
+                if (currentServer.IsTemporaryServer)
+                {
+                    //Do this again after ServerAssignment is saved so there's less chance of a race condition
+                    Server sourceMachine;
+                    using (await _dbContextSemaphore.UseWaitAsync())
+                    {
+                        sourceMachine = await _context.Server.FirstOrDefaultAsync(x => !x.IsTemporaryServer);
+                    }
+
+                    var newMachine = await _flyService.CopyMachine(sourceMachine.ServerId, _serverConfig.FlyBackendAppName, parameters.SelectedRegion);
+
+                    await Task.Delay(1000);
+                    
+                    currentServer.PrivateIpAddress = $"[{newMachine.PrivateIp}]";
+                    currentServer.ServerId = newMachine.Id;
+                    using (await _dbContextSemaphore.UseWaitAsync())
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+
+                    ((DbConfigProvider)_proxyConfigProvider).Update();
+                }
+
+                if (!currentServer.IsTemporaryServer)
+                {
+                    await _flyService.StartMachine(currentServer.ServerId);
+                }
+                
+                await _flyService.WaitMachine(currentServer.ServerId);
+
+                for (int i = 0; i < 5; i++)
+                {
+                    try
+                    {
+                        var serverUrl = $"http://{currentServer.PrivateIpAddress}:7000/";
+                        _logger.LogWarning($"Sending backend request to {serverUrl}, {currentServer.ServerId}");
+                        await new HttpClient { Timeout = TimeSpan.FromSeconds(15) }.GetAsync(serverUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to send request to backend, try {i}", i);
+                    }
+                }
+
+                await Task.WhenAll(startProxyTask, assignIpTask);
             }
 
             HttpContext.Session.SetKey(SessionKey.UserId, currentServer.ServerAssignment.AssignedUserId);
@@ -150,9 +248,11 @@ public class HomeController : BaseController
             {
                 try
                 {
-                    _context.DeallocateServer(currentServer);
-                    await _context.SaveChangesAsync();
-                    _processManager.StopProcess(currentServer);
+                    using (await _dbContextSemaphore.UseWaitAsync())
+                    {
+                        _context.DeallocateServer(currentServer);
+                        await _context.SaveChangesAsync();
+                    }
                 }
                 catch (Exception innerEx)
                 {

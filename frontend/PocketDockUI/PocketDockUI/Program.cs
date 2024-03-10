@@ -19,8 +19,7 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.Configure<ServerConfig>(builder.Configuration.GetSection(nameof(ServerConfig)));
 builder.Services.Configure<RecaptchaConfig>(builder.Configuration.GetSection(nameof(RecaptchaConfig)));
 builder.Services.AddScoped<RecaptchaService>();
-builder.Services.AddSingleton<ProcessManager>();
-builder.Services.AddHostedService<ProxyStartup>();
+builder.Services.AddTransient<FlyService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

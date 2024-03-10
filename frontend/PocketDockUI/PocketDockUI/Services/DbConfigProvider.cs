@@ -46,12 +46,13 @@ public class DbConfigProvider : IProxyConfigProvider
         var services = serviceScope.ServiceProvider;
 
         var context = services.GetRequiredService<PocketDockContext>();
+        var servers = context.Server.Where(x => (!x.IsTemporaryServer || x.ServerAssignmentId != null) && x.ServerId != null).ToList();
         var clusters = new[]
         {
             new ClusterConfig()
             {
                 ClusterId = "Console",
-                Destinations = context.Server.ToDictionary(x => x.ServerId, x => new DestinationConfig()
+                Destinations = servers.ToDictionary(x => x.ServerId, x => new DestinationConfig()
                 {
                     Address = $"http://{x.PrivateIpAddress}:7000"
                 })
@@ -59,7 +60,7 @@ public class DbConfigProvider : IProxyConfigProvider
             new ClusterConfig()
             {
                 ClusterId = "FileBrowser",
-                Destinations = context.Server.ToDictionary(x => x.ServerId, x => new DestinationConfig()
+                Destinations = servers.ToDictionary(x => x.ServerId, x => new DestinationConfig()
                 {
                     Address = $"http://{x.PrivateIpAddress}:8000"
                 })

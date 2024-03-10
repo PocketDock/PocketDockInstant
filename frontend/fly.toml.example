@@ -6,14 +6,6 @@ processes = []
 [env]
 
 [[services]]
-  #Specifying any UDP port will forward all UDP ports to the app
-  internal_port = 1
-  protocol = "udp"
-
-  [[services.ports]]
-    port = "1"
-
-[[services]]
   http_checks = []
   internal_port = 80
   processes = ["app"]

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PocketDockUI.Data;
@@ -11,9 +12,10 @@ using PocketDockUI.Data;
 namespace PocketDockUI.Data.Migrations
 {
     [DbContext(typeof(PocketDockContext))]
-    partial class PocketDockContextModelSnapshot : ModelSnapshot
+    [Migration("20240310024505_AddNewFields")]
+    partial class AddNewFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

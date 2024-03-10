@@ -1,5 +1,0 @@
-#!/bin/sh
-
-#docker-proxy writes logs to file descriptor 3, so we open it here and redirect it to stdout
-exec 3>&1
-exec docker-proxy $@

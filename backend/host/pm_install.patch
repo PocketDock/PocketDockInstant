@@ -1,19 +1,21 @@
---- get.sh	2023-07-11 00:05:56.218868363 +0000
-+++ get.sh.new	2023-07-11 00:07:30.963741927 +0000
-@@ -292,12 +292,12 @@
+--- get.sh	2024-01-28 21:31:33.217734700 -0600
++++ get.sh.new	2024-01-28 21:32:53.760065900 -0600
+@@ -287,13 +287,13 @@
  
  		echo -n " checking..."
  
 -		if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
-+#		if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
++		#if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
  			echo " done"
  			alldone=yes
 -		else
 -			echo " downloaded PHP build doesn't work on this platform!"
+-			rm -rf bin #make sure this doesn't leave a dead binary in case compile.sh fails
 -		fi
-+#		else
-+#			echo " downloaded PHP build doesn't work on this platform!"
-+#		fi
++		#else
++		#	echo " downloaded PHP build doesn't work on this platform!"
++		#	rm -rf bin #make sure this doesn't leave a dead binary in case compile.sh fails
++		#fi
  
  		break
  	done

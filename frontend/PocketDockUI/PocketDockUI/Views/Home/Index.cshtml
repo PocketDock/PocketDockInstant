@@ -8,6 +8,11 @@
 
 @inject IOptions<RecaptchaConfig> RecaptchaConfig
 
+@section Head
+{
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
+}
+
 @if (Model.SessionMessage != null)
 {
     <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
@@ -52,6 +57,14 @@
                                         <label for="versionSelector">Version:</label>
                                         <select asp-for="SelectedVersion" class="form-select" id="versionSelector" asp-items="@(new SelectList(Model.CachedVersions))">
                                         </select>
+                                    </div>
+                                    <label for="versionSelector">Region:</label>
+                                    <div class="input-group pb-4">
+                                        <select asp-for="SelectedRegion" class="form-select" id="regionSelector" asp-items="@(Model.AvailableRegions.Select(x => new SelectListItem(x.DisplayName, x.Region)))">
+                                        </select>
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mapModal">
+                                          Open Map
+                                        </button>
                                     </div>
                                 }
                                 <div id='recaptcha' class="g-recaptcha"
@@ -149,12 +162,32 @@
     </p>
 </footer>
 
+  <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="mapModalLabel">OpenStreetMap with Markers</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="map"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 @section Scripts
 {
+    <script>
+        const regions = JSON.parse('@Html.Raw(Json.Serialize(Model.AvailableRegions))');
+    </script>
     <script src="~/js/index.js" asp-append-version="true"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 }
-
 @functions
 {
     private string ConvertDisplay(bool value)

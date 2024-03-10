@@ -15,19 +15,22 @@ fly app create # Note the name that was provided/generated
 # Copy fly.toml.example and fill out app name
 cat .env | fly secrets import
 # Use --ha=false since we don't want UDP to be load balanced
+# If asked, use a shared IP and not a dedicated IP
 fly deploy --ha=false
-# If you didn't allocate a dedicated IPv4 address in the previous step, run
-fly ips allocate-v4
-# Run "fly machine ls" and note what region the machines are in. Needed for the next step.
+```
+
+Proxy deployment instructions:
+```sh
+cd proxy
+# Copy example.env to .env and fill it out
+./deploy.sh
 ```
 
 Backend deployment instructions:
 ```sh
 cd backend
 fly app create # Note the name that was provided/generated
+# Copy fly.toml.example and fill out app name
 # Copy example.env to .env and fill it out
-./deploy.sh
-
-# If you get the below error, run the deploy script again.
-#   "Error: machine failed to reach desired start state, and restart policy was set to no restart", 
+./update.sh
 ```

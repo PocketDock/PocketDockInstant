@@ -1,0 +1,11 @@
+accessLog:
+  filePath: "/app/access.log"
+
+providers:
+  http:
+    endpoint: "{{CONFIG_URL}}"
+
+entryPoints:
+  not_used: # Only used to wake up/keep alive the proxy, there's nothing behind it
+   address: ":4894"
+# Rest will be added at image build time

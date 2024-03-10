@@ -59,5 +59,4 @@
       <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_stacked.scss" />
       <_ContentIncludedByDefault Remove="wwwroot\font-awesome\scss\_variables.scss" />
     </ItemGroup>
-
 </Project>

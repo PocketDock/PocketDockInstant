@@ -1,4 +1,6 @@
 PocketDockUI/*/bin
 PocketDockUI/*/obj
+PocketDockUI.Data/*/bin
+PocketDockUI.Data/*/obj
 .idea
-secrets.txt
+.env

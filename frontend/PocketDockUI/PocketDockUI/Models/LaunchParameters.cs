@@ -10,4 +10,5 @@ public class LaunchParameters
     public string RecaptchaToken { get; set; }
 
     public string SelectedVersion { get; set; }
+    public string SelectedRegion { get; set; }
 }

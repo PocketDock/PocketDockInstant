@@ -33,10 +33,10 @@ while (true)
         var numPlayers = await queryService.GetPlayers();
         if (numPlayers > 0)
         {
-            Console.WriteLine("Resetting timer");
             inactivityTimeoutDate = DateTime.Now.AddSeconds(inactivityTimeout);
             if (!hasPlayers)
             {
+                Console.WriteLine("Resetting timer");
                 await UpdateStats(true);
                 hasPlayers = true;
             }

@@ -139,7 +139,14 @@ public class ServerController : ControllerBase, IActionFilter
         }
         
         server.ServerAssignment.StartTime ??= DateTimeOffset.Now.ToUniversalTime();
-        server.ServerAssignment.LastActivity = hasPlayers ? null : DateTimeOffset.Now.ToUniversalTime();
+        if (!hasPlayers)
+        {
+            server.ServerAssignment.LastActivity ??= DateTimeOffset.Now.ToUniversalTime();
+        }
+        else
+        {
+            server.ServerAssignment.LastActivity = null;   
+        }
 
         await _context.SaveChangesAsync();
 
@@ -148,7 +155,7 @@ public class ServerController : ControllerBase, IActionFilter
             //Keep proxy alive
             var httpClient = new HttpClient();
             httpClient.Timeout = TimeSpan.FromSeconds(5);
-            await httpClient.GetAsync($"http://{server.ServerAssignment.Proxy.IpAddress}:4894");   
+            await httpClient.GetAsync($"http://{server.ServerAssignment.Proxy.AppName}.internal:4894");   
         }
 
         return Ok();

@@ -65,6 +65,12 @@ while (true)
     {
         Console.WriteLine($"{serverTimeoutDate - DateTime.Now}, {inactivityTimeoutDate - DateTime.Now}");
     }
+    //Ping once a minute to notify that the server is alive, and also to keep the proxy alive
+    if (DateTimeOffset.Now.Second % 60 == 0)
+    {
+        Console.WriteLine("Updating stats");
+        await UpdateStats(hasPlayers);
+    }
 
     await Task.Delay(1000);
 }

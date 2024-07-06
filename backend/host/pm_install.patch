@@ -1,11 +1,11 @@
---- get.sh	2024-01-28 21:31:33.217734700 -0600
-+++ get.sh.new	2024-01-28 21:32:53.760065900 -0600
-@@ -287,13 +287,13 @@
+--- get.sh	2024-06-30 19:34:00.064892600 -0500
++++ get.sh.new	2024-06-30 19:35:47.046198800 -0500
+@@ -281,13 +281,13 @@
  
  		echo -n " checking..."
  
--		if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
-+		#if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
+-		if [ "$(./bin/php7/bin/php -ddisplay_errors=stderr -r 'echo 1;' 2>/dev/null)" == "1" ]; then
++		#if [ "$(./bin/php7/bin/php -ddisplay_errors=stderr -r 'echo 1;' 2>/dev/null)" == "1" ]; then
  			echo " done"
  			alldone=yes
 -		else

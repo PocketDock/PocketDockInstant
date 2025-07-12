@@ -1,9 +1,9 @@
 # pm_* stages should be kept separate from rest of stages, used as a base image for runc
 
-FROM debian:bullseye-slim as pm_build
+FROM debian:bookworm-slim as pm_build
 
 # Enable src repos and build screen static binary
-RUN find /etc/apt/sources.list* -type f -exec sed -i 'p; s/^deb /deb-src /' '{}' +
+RUN sed -i 's/^Types: deb$/Types: deb deb-src/g' /etc/apt/sources.list.d/debian.sources
 RUN apt-get update
 
 RUN mkdir /screen
@@ -40,7 +40,7 @@ WORKDIR /app
 RUN curl -Lo install.sh https://get.pmmp.io && chmod +x install.sh && ./install.sh -r
 
 
-FROM gcr.io/distroless/cc-debian11:debug as pm_base
+FROM gcr.io/distroless/cc-debian12:debug as pm_base
 
 RUN ["/busybox/ln", "-s", "/busybox/busybox", "/bin/sh"]
 RUN ln -s /busybox/busybox /bin/sleep
